@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <meta name="theme-color" content="#0d9488" />
+  <meta name="description" content="RuralCare: Right Care • Right Time • Right Place - Smart India Hackathon 2026 (SIH26133) by Team VisionX." />
+  
+  <title>RuralCare • Smart India Hackathon 2026 (SIH26133)</title>
+
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="stylesheet" href="./styles.css" />
+
+  <!-- Leaflet.js for GPS Maps (CDN with offline fallback handled in views/ambulance.js) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Chart.js for Impact & Analytics (CDN with offline fallback handled in views/analytics.js) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- Persistent Top Bar -->
+  <header class="top-bar">
+    <div class="top-bar-inner">
+      <!-- Logo & Branding -->
+      <a href="#/" class="brand-group" aria-label="RuralCare Home">
+        <div class="brand-logo-badge">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+          </svg>
+        </div>
+        <div class="brand-titles">
+          <h1>RuralCare</h1>
+          <span class="brand-tagline-sub">Right Care • Right Time • Right Place</span>
+        </div>
+        <span class="sih-tag">SIH 2026</span>
+      </a>
+
+      <!-- Action Utilities -->
+      <div class="top-bar-actions">
+        <!-- Language Switcher -->
+        <div class="lang-dropdown-wrapper" title="Change Regional Language">
+          <select id="global-lang-select" aria-label="Select Language">
+            <option value="en">English</option>
+            <option value="hi">हिन्दी (Hindi)</option>
+            <option value="ta">தமிழ் (Tamil)</option>
+            <option value="te">తెలుగు (Telugu)</option>
+            <option value="bn">বাংলা (Bengali)</option>
+            <option value="mr">मराठी (Marathi)</option>
+          </select>
+        </div>
+
+        <!-- Voice Assistant Mic Button -->
+        <button id="mic-toggle-btn" class="top-action-btn" title="Voice Assistant & Dictation (Press to Speak)" aria-label="Voice Assistant">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+        </button>
+
+        <!-- TTS Screen Reader Speaker Button -->
+        <button id="speaker-toggle-btn" class="top-action-btn" title="Text-to-Speech (Listen to Screen Content)" aria-label="Read Screen Aloud">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+        </button>
+
+        <!-- Connectivity Status Pill -->
+        <div id="connection-status-pill" class="status-pill online" title="Network Telemetry">
+          <span class="pill-dot"></span>
+          <span>Online</span>
+        </div>
+
+        <!-- Offline Queue Badge Link -->
+        <a href="#/offline" id="offline-queue-badge" class="badge badge-amber hidden" title="View Offline Queued Transactions">
+          0 Pending
+        </a>
+
+        <!-- Notifications Bell -->
+        <button id="notif-bell-btn" class="top-action-btn" title="Notifications Center" aria-label="Notifications">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+          <span id="notif-count-badge" class="notif-badge-pill hidden">0</span>
+        </button>
+
+        <!-- Role / User Profile Menu Button -->
+        <button id="profile-menu-btn" class="btn btn-xs btn-outline" style="min-height:36px; padding:4px 10px;" title="Switch Role / View Profile">
+          <span id="top-bar-user-name">Ramesh</span>
+          <span id="top-bar-user-role" class="badge badge-teal ml-2">PATIENT</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Full Navigation Bar (Desktop & Tablet) -->
+  <nav class="nav-links-bar">
+    <div class="nav-links-inner" id="top-nav-links">
+      <a href="#/" class="nav-link active" data-i18n="home">Home</a>
+      <a href="#/appointments" class="nav-link" data-i18n="appointments">Appointments</a>
+      <a href="#/emergency" class="nav-link text-red" data-i18n="emergency">Emergency SOS</a>
+      <a href="#/ambulance" class="nav-link" data-i18n="ambulance">Ambulance</a>
+      <a href="#/teleconsult" class="nav-link" data-i18n="teleconsult">Teleconsult</a>
+      <a href="#/records" class="nav-link" data-i18n="records">Health Records</a>
+      <a href="#/referrals" class="nav-link" data-i18n="referrals">Referrals</a>
+      <a href="#/medicines" class="nav-link" data-i18n="medicines">Medicines</a>
+      <a href="#/followups" class="nav-link" data-i18n="followups">Follow-ups</a>
+      <a href="#/blood" class="nav-link" data-i18n="blood">Blood Bank</a>
+      <a href="#/organ" class="nav-link" data-i18n="organ">Organ Pledge</a>
+      <a href="#/fund" class="nav-link" data-i18n="fund">Emergency Fund</a>
+      <a href="#/camps" class="nav-link" data-i18n="camps">Health Camps</a>
+      <a href="#/analytics" class="nav-link" data-i18n="analytics">Impact & Analytics</a>
+      <a href="#/ussd-sms" class="nav-link" data-i18n="ussd_sms">SMS/USSD Gateway</a>
+      <a href="#/about" class="nav-link" data-i18n="about">About & Research</a>
+    </div>
+  </nav>
+
+  <!-- Persistent Offline Warning Banner (Revealed when offline) -->
+  <aside id="offline-notice-banner" class="offline-banner hidden" role="status">
+    <div class="offline-banner-inner">
+      <div class="flex-align">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.58 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+        <span><strong>Offline Mode Active:</strong> You can continue booking, recording triage, and checking medicine schedules. Submissions are safely queued in IndexedDB.</span>
+      </div>
+      <div>
+        <a href="#/offline" class="btn btn-xs btn-amber">Offline Center &rarr;</a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Notification Center Drawer -->
+  <div id="notification-drawer" class="drawer" aria-labelledby="drawer-heading" role="dialog" aria-modal="true">
+    <div class="drawer-header flex-between">
+      <h3 id="drawer-heading" style="font-size:1.1rem; margin:0;">Notifications & Alerts</h3>
+      <button id="close-notif-drawer" class="modal-close" aria-label="Close Notifications">&times;</button>
+    </div>
+    <div class="drawer-body" id="drawer-notifications-list">
+      <!-- Dynamic notifications will render here -->
+    </div>
+  </div>
+
+  <!-- Role Switcher Modal -->
+  <div id="role-switch-modal" class="modal-overlay hidden" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div class="modal-header flex-between">
+        <h3>Switch Role & Dashboard</h3>
+        <button id="close-role-modal" class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="text-sm text-muted mb-3">Select a role to test role-specific dashboards, workflows, and permissions:</p>
+        <div class="role-grid" style="grid-template-columns: 1fr;">
+          <div class="p-3 border rounded mb-2 flex-between cursor-pointer" onclick="quickSwitchRole('patient')">
+            <div>
+              <strong>Ramesh Kumar (Patient)</strong>
+              <div class="text-xs text-muted">Village: Rampur • ABHA: 14-8921-4402-9912</div>
+            </div>
+            <span class="badge badge-teal">Switch &rarr;</span>
+          </div>
+
+          <div class="p-3 border rounded mb-2 flex-between cursor-pointer" onclick="quickSwitchRole('asha')">
+            <div>
+              <strong>Sunita Devi (ASHA / ANM Worker)</strong>
+              <div class="text-xs text-muted">Sub-Center Rampur • Tracked Population: 1,420</div>
+            </div>
+            <span class="badge badge-emerald">Switch &rarr;</span>
+          </div>
+
+          <div class="p-3 border rounded mb-2 flex-between cursor-pointer" onclick="quickSwitchRole('doctor')">
+            <div>
+              <strong>Dr. Arvind Sharma (Medical Officer)</strong>
+              <div class="text-xs text-muted">MBBS, MD • PHC Rampur OPD & Telemedicine</div>
+            </div>
+            <span class="badge badge-blue">Switch &rarr;</span>
+          </div>
+
+          <div class="p-3 border rounded flex-between cursor-pointer" onclick="quickSwitchRole('admin')">
+            <div>
+              <strong>Rajesh Verma (Health Administrator)</strong>
+              <div class="text-xs text-muted">District Health Officer (DHO) • Raigarh Command Center</div>
+            </div>
+            <span class="badge badge-purple">Switch &rarr;</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Voice Assistant Feedback Modal -->
+  <div id="voice-modal" class="modal-overlay hidden" role="dialog">
+    <div class="modal-card text-center p-4">
+      <div class="mb-3">
+        <div class="pulsing-mic-circle" style="width:70px; height:70px; border-radius:50%; background:var(--primary-teal-light); display:flex; align-items:center; justify-content:center; margin:0 auto;">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+        </div>
+      </div>
+      <h3>RuralCare Voice Assistant</h3>
+      <p id="voice-status-text" class="text-sm text-teal font-bold mb-2">Listening... Please speak your command or form entry.</p>
+      <div id="voice-transcript" class="font-mono text-sm p-3 bg-surface rounded mb-3">"..."</div>
+      <p class="text-xs text-muted">Try saying: <em>"Emergency"</em>, <em>"Ambulance"</em>, <em>"Doctor appointment"</em>, <em>"Medicines"</em>, or <em>"Read screen"</em>.</p>
+    </div>
+  </div>
+
+  <!-- Floating Persistent Red SOS Trigger Button -->
+  <button id="global-sos-btn" class="floating-sos-btn btn-pulse" aria-label="Trigger Emergency SOS">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <span data-i18n="sos_button">EMERGENCY SOS</span>
+  </button>
+
+  <!-- SPA Router Mount Point -->
+  <main id="app" role="main">
+    <!-- Active view will be dynamically injected here -->
+  </main>
+
+  <!-- Mobile Bottom Quick Navigation Dock -->
+  <nav class="mobile-bottom-dock" aria-label="Mobile Navigation">
+    <div class="dock-items-row">
+      <a href="#/" class="dock-item active">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span>Home</span>
+      </a>
+      <a href="#/appointments" class="dock-item">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span>Book</span>
+      </a>
+      <a href="#/emergency" class="dock-item dock-sos">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span>SOS</span>
+      </a>
+      <a href="#/records" class="dock-item">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        <span>Records</span>
+      </a>
+      <a href="#/ussd-sms" class="dock-item">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+        <span>*123#</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- App Footer -->
+  <footer class="app-footer">
+    <div class="footer-inner">
+      <div>
+        <strong>RuralCare | VisionX | SIH 2026</strong> — Problem Statement ID: SIH26133
+      </div>
+      <div>
+        <span>"Right Care • Right Time • Right Place"</span> •
+        <a href="#/about" class="text-teal font-bold ml-2">About & Research Citations &rarr;</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Core JavaScript Modules (Ordered Dependency Tree) -->
+  <script src="./icons.js"></script>
+  <script src="./i18n.js"></script>
+  <script src="./firebase-config.js"></script>
+  <script src="./store.js"></script>
+  <script src="./idb-queue.js"></script>
+  <script src="./voice-assistant.js"></script>
+
+  <!-- View Screens -->
+  <script src="./landing.js"></script>
+  <script src="./login.js"></script>
+  <script src="./dashboards.js"></script>
+  <script src="./appointments.js"></script>
+  <script src="./emergency.js"></script>
+  <script src="./ambulance.js"></script>
+  <script src="./teleconsult.js"></script>
+  <script src="./records.js"></script>
+  <script src="./referrals.js"></script>
+  <script src="./medicines.js"></script>
+  <script src="./followups.js"></script>
+  <script src="./offline.js"></script>
+  <script src="./blood.js"></script>
+  <script src="./organ.js"></script>
+  <script src="./fund.js"></script>
+  <script src="./camps.js"></script>
+  <script src="./analytics.js"></script>
+  <script src="./ussd-sms.js"></script>
+  <script src="./about.js"></script>
+
+  <!-- SPA Router & Global Controller -->
+  <script src="./router.js"></script>
+  <script src="./app.js"></script>
+
+</body>
+</html>
