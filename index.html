@@ -1,281 +1,478 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
-  <meta name="theme-color" content="#0d9488" />
-  <meta name="description" content="RuralCare: Right Care • Right Time • Right Place - Smart India Hackathon 2026 (SIH26133) by Team VisionX." />
-  
-  <title>RuralCare • Smart India Hackathon 2026 (SIH26133)</title>
-
-  <link rel="manifest" href="./manifest.webmanifest" />
-  <link rel="stylesheet" href="./styles.css" />
-
-  <!-- Leaflet.js for GPS Maps (CDN with offline fallback handled in views/ambulance.js) -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-  <!-- Chart.js for Impact & Analytics (CDN with offline fallback handled in views/analytics.js) -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PashuRaksha – Livestock disease early warning</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Hind:wght@400;500;600&family=Noto+Sans+Tamil:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef3ec;--panel:#fff;--ink:#14261c;--mute:#51655a;--line:#cfdccd;--brand:#0f6b4f;--brand-ink:#fff;--sun:#e8a317;--red:#b3261e;--soft:#dfeadb;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1b14;--panel:#17271d;--ink:#e6f0e8;--mute:#9bb2a3;--line:#2a4032;--brand:#4cc19a;--brand-ink:#06251a;--sun:#f0b84a;--red:#ff8a80;--soft:#1e3427}}
+:root[data-theme="dark"]{--bg:#0f1b14;--panel:#17271d;--ink:#e6f0e8;--mute:#9bb2a3;--line:#2a4032;--brand:#4cc19a;--brand-ink:#06251a;--sun:#f0b84a;--red:#ff8a80;--soft:#1e3427}
+html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.6 Hind,'Noto Sans Tamil',system-ui,sans-serif}
+h1,h2,h3{font-family:'Bricolage Grotesque',Hind,'Noto Sans Tamil',Georgia,sans-serif;line-height:1.1;margin:0}
+a{color:var(--brand)}
+:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+header{border-bottom:1px solid var(--line)}
+header .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-top:14px;padding-bottom:14px;flex-wrap:wrap}
+.logo{font:800 22px 'Bricolage Grotesque',sans-serif}
+.logo span{color:var(--brand)}
+nav{display:flex;gap:18px;flex-wrap:wrap;font-size:15px}
+nav a{color:var(--ink);text-decoration:none}
+nav a:hover{text-decoration:underline}
+.hero{padding:44px 0 28px}
+.hero h1{font-size:clamp(34px,5.2vw,58px);font-weight:800;letter-spacing:-.025em;max-width:16ch}
+.hero p{font-size:19px;color:var(--mute);max-width:52ch;margin:16px 0 0}
+.tag{display:inline-block;font-size:14px;font-weight:600;background:var(--soft);padding:4px 12px;border-radius:99px;margin-bottom:16px}
+.checker{display:grid;grid-template-columns:1.1fr .9fr;gap:24px;align-items:start;padding-bottom:56px}
+.card{background:var(--panel);border:2px solid var(--ink);border-radius:18px;padding:20px}
+.card.out{box-shadow:8px 8px 0 var(--brand);position:sticky;top:12px}
+.card h2{font-size:22px;margin-bottom:4px}
+.step{margin-top:20px}
+.step h3{font-size:16px;margin-bottom:8px}
+.sub{margin:0;font-size:15px;color:var(--mute)}
+.view{position:relative;aspect-ratio:16/10;border-radius:12px;background:#0d1a13;overflow:hidden;display:grid;place-items:center;color:#cfe3d6;text-align:center}
+.view video,.view img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.view .hint{padding:16px;font-size:15px}
+.corner{position:absolute;width:24px;height:24px;border:3px solid var(--sun);pointer-events:none}
+.c1{top:10px;left:10px;border-right:0;border-bottom:0}.c2{top:10px;right:10px;border-left:0;border-bottom:0}
+.c3{bottom:10px;left:10px;border-right:0;border-top:0}.c4{bottom:10px;right:10px;border-left:0;border-top:0}
+.row{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;align-items:center}
+button,.btn{font:600 16px Hind,'Noto Sans Tamil',sans-serif;border-radius:10px;padding:10px 16px;border:2px solid var(--ink);background:var(--panel);color:var(--ink);cursor:pointer}
+button.primary{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+button:disabled{opacity:.5;cursor:not-allowed}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips label{cursor:pointer}
+.chips input{position:absolute;opacity:0;pointer-events:none}
+.chips span{display:block;padding:7px 13px;border:2px solid var(--line);border-radius:99px;font-size:15px;line-height:1.3;background:var(--panel)}
+.chips input:checked+span{background:var(--brand);border-color:var(--brand);color:var(--brand-ink);font-weight:600}
+.chips input:focus-visible+span{outline:3px solid var(--sun);outline-offset:2px}
+.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+label.f{display:block;font-size:14px;font-weight:600;color:var(--mute)}
+input[type=number],input[type=text],select{width:100%;font:500 16px Hind,'Noto Sans Tamil',sans-serif;padding:9px 10px;border-radius:10px;border:2px solid var(--line);background:var(--panel);color:var(--ink);margin-top:4px}
+.note{font-size:14px;color:var(--mute);margin:10px 0 0}
+.err{color:var(--red);font-weight:600}
+[hidden]{display:none!important}
+.empty{color:var(--mute);margin:10px 0 0}
+.badge{display:inline-block;font-weight:700;padding:3px 12px;border-radius:99px;font-size:14px;color:#fff}
+.u-low{background:#2e7d32}.u-medium{background:#b26a00}.u-high{background:var(--red)}
+.alert{border-left:6px solid var(--red);background:color-mix(in srgb,var(--red) 12%,transparent);padding:10px 14px;border-radius:6px;margin:12px 0;font-weight:600;font-size:15px}
+.out h3{font-size:17px;margin:16px 0 6px}
+.out ul{margin:0;padding-left:20px}
+.cond{padding:9px 0;border-bottom:1px solid var(--line)}
+.cond div{display:flex;justify-content:space-between;gap:10px;font-weight:600}
+.cond small{color:var(--mute);display:block;font-weight:400}
+.rep{white-space:pre-wrap;background:var(--soft);border-radius:10px;padding:12px;font-size:14px;line-height:1.5;margin:0}
+.disc{font-size:13px;color:var(--mute);margin-top:14px}
+section.s{padding:52px 0;border-top:1px solid var(--line)}
+section.s h2{font-size:clamp(26px,4vw,38px);font-weight:800;letter-spacing:-.02em;margin-bottom:10px}
+.intro{color:var(--mute);max-width:60ch;margin:0 0 26px}
+.flow{display:grid;grid-template-columns:repeat(4,1fr);counter-reset:s;list-style:none;padding:0;margin:0}
+.flow li{counter-increment:s;padding:18px 18px 18px 0;border-top:3px solid var(--brand);position:relative}
+.flow li:before{content:counter(s);font:800 14px 'Bricolage Grotesque';background:var(--brand);color:var(--brand-ink);width:26px;height:26px;border-radius:50%;display:grid;place-items:center;position:absolute;top:-15px;left:0}
+.flow h3{font-size:19px;margin:10px 0 6px}
+.flow p{margin:0;font-size:15px;color:var(--mute)}
+.cols{display:grid;grid-template-columns:repeat(3,1fr);gap:32px}
+.cols h3{font-size:20px;margin-bottom:8px}
+.cols ul{margin:0;padding-left:18px}
+.cols li{margin-bottom:6px}
+.stack{display:grid;grid-template-columns:150px 1fr;border-top:1px solid var(--line);margin:0}
+.stack dt,.stack dd{margin:0;padding:11px 0;border-bottom:1px solid var(--line)}
+.stack dt{font-weight:600}
+footer{background:var(--ink);color:var(--bg);padding:34px 0 42px}
+footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+footer p{margin:4px 0;font-size:15px;opacity:.85}
+footer b{font:700 22px 'Bricolage Grotesque',sans-serif}
+@media (max-width:860px){.checker{grid-template-columns:1fr}.card.out{position:static}.flow,.cols{grid-template-columns:1fr}.flow li{padding-right:0}.stack{grid-template-columns:1fr}.stack dt{border-bottom:0;padding-bottom:0}}
+</style>
 </head>
 <body>
+<header><div class="wrap">
+<div class="logo">Pashu<span>Raksha</span></div>
+<nav aria-label="Sections"><a href="#check">Check an animal</a><a href="#how">How it works</a><a href="#tech">Technology</a><a href="#impact">Impact</a></nav>
+<select id="lang" aria-label="Language" style="width:auto;margin:0"><option value="en">English</option><option value="ta">தமிழ்</option><option value="hi">हिन्दी</option></select>
+</div></header>
 
-  <!-- Persistent Top Bar -->
-  <header class="top-bar">
-    <div class="top-bar-inner">
-      <!-- Logo & Branding -->
-      <a href="#/" class="brand-group" aria-label="RuralCare Home">
-        <div class="brand-logo-badge">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
-          </svg>
-        </div>
-        <div class="brand-titles">
-          <h1>RuralCare</h1>
-          <span class="brand-tagline-sub">Right Care • Right Time • Right Place</span>
-        </div>
-        <span class="sih-tag">SIH 2026</span>
-      </a>
+<main>
+<div class="wrap hero">
+<h1>Catch livestock disease before it spreads.</h1>
+<p>Photograph the animal, tick the signs you see, and get possible diseases, urgency and what to do next. Then send a ready-made report to your vet officer by SMS or WhatsApp. Works without internet once loaded.</p>
+</div>
 
-      <!-- Action Utilities -->
-      <div class="top-bar-actions">
-        <!-- Language Switcher -->
-        <div class="lang-dropdown-wrapper" title="Change Regional Language">
-          <select id="global-lang-select" aria-label="Select Language">
-            <option value="en">English</option>
-            <option value="hi">हिन्दी (Hindi)</option>
-            <option value="ta">தமிழ் (Tamil)</option>
-            <option value="te">తెలుగు (Telugu)</option>
-            <option value="bn">বাংলা (Bengali)</option>
-            <option value="mr">मराठी (Marathi)</option>
-          </select>
-        </div>
+<div class="wrap checker" id="check">
+<div class="card">
+<h2>Check your animal</h2>
+<p class="sub">Four quick steps. The result updates when you press Check.</p>
 
-        <!-- Voice Assistant Mic Button -->
-        <button id="mic-toggle-btn" class="top-action-btn" title="Voice Assistant & Dictation (Press to Speak)" aria-label="Voice Assistant">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
-        </button>
+<div class="step">
+<h3>1. Add a photo (optional)</h3>
+<div class="view">
+<div class="hint" id="hint">Photo of the animal or the affected part</div>
+<video id="vid" playsinline muted hidden></video>
+<img id="shot" alt="Captured animal photo" hidden>
+<span class="corner c1"></span><span class="corner c2"></span><span class="corner c3"></span><span class="corner c4"></span>
+</div>
+<canvas id="cv" hidden></canvas>
+<input type="file" id="file" accept="image/*" capture="environment" hidden>
+<div class="row" id="r-idle"><button id="b-cam">Open camera</button><button id="b-up">Take or upload photo</button></div>
+<div class="row" id="r-live" hidden><button class="primary" id="b-snap">Capture</button><button id="b-stop">Cancel</button></div>
+<div class="row" id="r-shot" hidden><button id="b-redo">Remove photo</button></div>
+<p class="note" id="msg" role="status"></p>
+</div>
 
-        <!-- TTS Screen Reader Speaker Button -->
-        <button id="speaker-toggle-btn" class="top-action-btn" title="Text-to-Speech (Listen to Screen Content)" aria-label="Read Screen Aloud">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-        </button>
+<div class="step">
+<h3>2. Which animal?</h3>
+<div class="chips" id="species"></div>
+</div>
 
-        <!-- Connectivity Status Pill -->
-        <div id="connection-status-pill" class="status-pill online" title="Network Telemetry">
-          <span class="pill-dot"></span>
-          <span>Online</span>
-        </div>
+<div class="step">
+<h3>3. What signs do you see?</h3>
+<div class="chips" id="signs"></div>
+</div>
 
-        <!-- Offline Queue Badge Link -->
-        <a href="#/offline" id="offline-queue-badge" class="badge badge-amber hidden" title="View Offline Queued Transactions">
-          0 Pending
-        </a>
+<div class="step">
+<h3>4. Details</h3>
+<div class="grid2">
+<label class="f">Animals sick<input type="number" id="n-sick" min="1" value="1"></label>
+<label class="f">Animals dead<input type="number" id="n-dead" min="0" value="0"></label>
+<label class="f">Sick for<select id="dur"><option>Less than 1 day</option><option>1 to 3 days</option><option>More than 3 days</option></select></label>
+<label class="f">Village or location<input type="text" id="loc" placeholder="Village, block"></label>
+</div>
+<div class="row"><button class="primary" id="b-go">Check</button><button id="b-clear">Start over</button></div>
+</div>
+</div>
 
-        <!-- Notifications Bell -->
-        <button id="notif-bell-btn" class="top-action-btn" title="Notifications Center" aria-label="Notifications">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
-          <span id="notif-count-badge" class="notif-badge-pill hidden">0</span>
-        </button>
+<div class="card out" id="out" aria-live="polite">
+<h2>Result</h2>
+<p class="empty" id="empty">Choose the animal and at least one sign, then press Check.</p>
+<div id="res" hidden></div>
+</div>
+</div>
 
-        <!-- Role / User Profile Menu Button -->
-        <button id="profile-menu-btn" class="btn btn-xs btn-outline" style="min-height:36px; padding:4px 10px;" title="Switch Role / View Profile">
-          <span id="top-bar-user-name">Ramesh</span>
-          <span id="top-bar-user-role" class="badge badge-teal ml-2">PATIENT</span>
-        </button>
-      </div>
-    </div>
-  </header>
+<section class="s" id="how"><div class="wrap">
+<h2>From a farmer's report to a containment action</h2>
+<p class="intro">Reporting, vaccination, lab and response sit in one workflow, so nothing gets lost between the village and the district office.</p>
+<ol class="flow">
+<li><h3>Report</h3><p>A farmer or para-vet sends species, signs, count, deaths and location, with an optional photo.</p></li>
+<li><h3>Triage</h3><p>Vet-reviewed rules score the signs against a disease matrix. Notifiable and zoonotic diseases escalate automatically.</p></li>
+<li><h3>Verify and sample</h3><p>The vet officer confirms, sends samples to the lab and starts containment.</p></li>
+<li><h3>Track</h3><p>A dashboard shows the outbreak map, vaccination coverage, reporting delay and open cases.</p></li>
+</ol>
+</div></section>
 
-  <!-- Full Navigation Bar (Desktop & Tablet) -->
-  <nav class="nav-links-bar">
-    <div class="nav-links-inner" id="top-nav-links">
-      <a href="#/" class="nav-link active" data-i18n="home">Home</a>
-      <a href="#/appointments" class="nav-link" data-i18n="appointments">Appointments</a>
-      <a href="#/emergency" class="nav-link text-red" data-i18n="emergency">Emergency SOS</a>
-      <a href="#/ambulance" class="nav-link" data-i18n="ambulance">Ambulance</a>
-      <a href="#/teleconsult" class="nav-link" data-i18n="teleconsult">Teleconsult</a>
-      <a href="#/records" class="nav-link" data-i18n="records">Health Records</a>
-      <a href="#/referrals" class="nav-link" data-i18n="referrals">Referrals</a>
-      <a href="#/medicines" class="nav-link" data-i18n="medicines">Medicines</a>
-      <a href="#/followups" class="nav-link" data-i18n="followups">Follow-ups</a>
-      <a href="#/blood" class="nav-link" data-i18n="blood">Blood Bank</a>
-      <a href="#/organ" class="nav-link" data-i18n="organ">Organ Pledge</a>
-      <a href="#/fund" class="nav-link" data-i18n="fund">Emergency Fund</a>
-      <a href="#/camps" class="nav-link" data-i18n="camps">Health Camps</a>
-      <a href="#/analytics" class="nav-link" data-i18n="analytics">Impact & Analytics</a>
-      <a href="#/ussd-sms" class="nav-link" data-i18n="ussd_sms">SMS/USSD Gateway</a>
-      <a href="#/about" class="nav-link" data-i18n="about">About & Research</a>
-    </div>
-  </nav>
+<section class="s" id="tech"><div class="wrap">
+<h2>Technology</h2>
+<p class="intro">Proven, low-cost, open-source parts. The auditable rule engine comes first; machine learning is added for photo, voice and trend risk.</p>
+<dl class="stack">
+<dt>Frontend</dt><dd>React PWA and Android app, offline-first with local sync</dd>
+<dt>Backend</dt><dd>Python (FastAPI) for triage rules and case workflow</dd>
+<dt>AI and ML</dt><dd>Rule engine, then ML for photo, voice and trend risk</dd>
+<dt>Database</dt><dd>PostgreSQL with PostGIS for herd and geo data</dd>
+<dt>Security</dt><dd>Firebase Authentication, role-based access, encryption</dd>
+<dt>Messaging</dt><dd>SMS, IVR, USSD and a WhatsApp gateway for alerts</dd>
+</dl>
+</div></section>
 
-  <!-- Persistent Offline Warning Banner (Revealed when offline) -->
-  <aside id="offline-notice-banner" class="offline-banner hidden" role="status">
-    <div class="offline-banner-inner">
-      <div class="flex-align">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.58 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
-        <span><strong>Offline Mode Active:</strong> You can continue booking, recording triage, and checking medicine schedules. Submissions are safely queued in IndexedDB.</span>
-      </div>
-      <div>
-        <a href="#/offline" class="btn btn-xs btn-amber">Offline Center &rarr;</a>
-      </div>
-    </div>
-  </aside>
+<section class="s" id="impact"><div class="wrap">
+<h2>Impact</h2>
+<div class="cols" style="margin-top:22px">
+<div><h3>Social</h3><ul><li>Advisories in local languages</li><li>Protects smallholder livelihoods</li><li>Lowers zoonotic risk to villages</li></ul></div>
+<div><h3>Animal health</h3><ul><li>Earlier outbreak detection</li><li>Faster referral and treatment</li><li>Fewer deaths through quicker containment</li></ul></div>
+<div><h3>Economic</h3><ul><li>Lower mortality and productivity loss</li><li>Less travel to distant labs</li><li>Protects milk, meat and trade income</li></ul></div>
+</div>
+</div></section>
+</main>
 
-  <!-- Notification Center Drawer -->
-  <div id="notification-drawer" class="drawer" aria-labelledby="drawer-heading" role="dialog" aria-modal="true">
-    <div class="drawer-header flex-between">
-      <h3 id="drawer-heading" style="font-size:1.1rem; margin:0;">Notifications & Alerts</h3>
-      <button id="close-notif-drawer" class="modal-close" aria-label="Close Notifications">&times;</button>
-    </div>
-    <div class="drawer-body" id="drawer-notifications-list">
-      <!-- Dynamic notifications will render here -->
-    </div>
-  </div>
+<footer><div class="wrap">
+<div><b>PashuRaksha</b><p>Right alert · Right time · Right place</p></div>
+<div><p>Team Tech Vision X · Team ID 191795</p></div>
+</div></footer>
 
-  <!-- Role Switcher Modal -->
-  <div id="role-switch-modal" class="modal-overlay hidden" role="dialog" aria-modal="true">
-    <div class="modal-card">
-      <div class="modal-header flex-between">
-        <h3>Switch Role & Dashboard</h3>
-        <button id="close-role-modal" class="modal-close">&times;</button>
-      </div>
-      <div class="modal-body">
-        <p class="text-sm text-muted mb-3">Select a role to test role-specific dashboards, workflows, and permissions:</p>
-        <div class="role-grid" style="grid-template-columns: 1fr;">
-          <div class="p-3 border rounded mb-2 flex-between cursor-pointer" onclick="quickSwitchRole('patient')">
-            <div>
-              <strong>Ramesh Kumar (Patient)</strong>
-              <div class="text-xs text-muted">Village: Rampur • ABHA: 14-8921-4402-9912</div>
-            </div>
-            <span class="badge badge-teal">Switch &rarr;</span>
-          </div>
+<script>
+const ROWS=[
+["Check an animal","விலங்கைப் பரிசோதி","पशु की जाँच करें"],
+["How it works","எப்படி செயல்படுகிறது","यह कैसे काम करता है"],
+["Technology","தொழில்நுட்பம்","तकनीक"],
+["Impact","தாக்கம்","प्रभाव"],
+["Catch livestock disease before it spreads.","கால்நடை நோய் பரவும் முன் கண்டறியுங்கள்.","पशु रोग फैलने से पहले पकड़ें।"],
+["Photograph the animal, tick the signs you see, and get possible diseases, urgency and what to do next. Then send a ready-made report to your vet officer by SMS or WhatsApp. Works without internet once loaded.","விலங்கைப் படம் எடுத்து, தெரியும் அறிகுறிகளைத் தேர்ந்தெடுத்தால் சாத்தியமான நோய்கள், அவசரநிலை, அடுத்து செய்ய வேண்டியவை கிடைக்கும். பிறகு தயாரான அறிக்கையை SMS அல்லது WhatsApp மூலம் கால்நடை அலுவலருக்கு அனுப்புங்கள். ஒருமுறை திறந்தபின் இணையம் இல்லாமலும் வேலை செய்யும்.","पशु की फोटो लें, दिखने वाले लक्षण चुनें और संभावित बीमारियाँ, गंभीरता और आगे के कदम पाएँ। फिर तैयार रिपोर्ट SMS या WhatsApp से पशु अधिकारी को भेजें। एक बार खुलने के बाद बिना इंटरनेट भी चलता है।"],
+["Check your animal","உங்கள் விலங்கைப் பரிசோதியுங்கள்","अपने पशु की जाँच करें"],
+["Four quick steps. The result updates when you press Check.","நான்கு எளிய படிகள். 'பரிசோதி' அழுத்தியதும் முடிவு வரும்.","चार आसान कदम। 'जाँच करें' दबाने पर नतीजा आएगा।"],
+["1. Add a photo (optional)","1. படம் சேர்க்கவும் (விருப்பம்)","1. फोटो जोड़ें (वैकल्पिक)"],
+["Photo of the animal or the affected part","விலங்கு அல்லது பாதித்த பகுதியின் படம்","पशु या प्रभावित हिस्से की फोटो"],
+["Open camera","கேமரா திற","कैमरा खोलें"],
+["Take or upload photo","படம் எடு / பதிவேற்று","फोटो लें या अपलोड करें"],
+["Capture","படம் எடு","फोटो खींचें"],
+["Cancel","ரத்து","रद्द करें"],
+["Remove photo","படத்தை நீக்கு","फोटो हटाएँ"],
+["2. Which animal?","2. எந்த விலங்கு?","2. कौन सा पशु?"],
+["3. What signs do you see?","3. என்ன அறிகுறிகள் தெரிகின்றன?","3. कौन से लक्षण दिख रहे हैं?"],
+["4. Details","4. விவரங்கள்","4. जानकारी"],
+["Animals sick","நோய்வாய்ப்பட்டவை","बीमार पशु"],
+["Animals dead","இறந்தவை","मरे पशु"],
+["Sick for","எத்தனை நாளாக நோய்","कब से बीमार"],
+["Village or location","கிராமம் அல்லது இடம்","गाँव या स्थान"],
+["Village, block","கிராமம், வட்டம்","गाँव, ब्लॉक"],
+["Less than 1 day","1 நாளுக்கும் குறைவு","1 दिन से कम"],
+["1 to 3 days","1 முதல் 3 நாட்கள்","1 से 3 दिन"],
+["More than 3 days","3 நாட்களுக்கு மேல்","3 दिन से ज़्यादा"],
+["Check","பரிசோதி","जाँच करें"],
+["Start over","மீண்டும் தொடங்கு","फिर से शुरू करें"],
+["Result","முடிவு","नतीजा"],
+["Choose the animal and at least one sign, then press Check.","விலங்கையும் குறைந்தது ஒரு அறிகுறியையும் தேர்ந்தெடுத்து 'பரிசோதி' அழுத்தவும்.","पशु और कम से कम एक लक्षण चुनें, फिर 'जाँच करें' दबाएँ।"],
+[`Live camera is blocked here. Use "Take or upload photo" instead.`,"நேரடி கேமரா இங்கே தடுக்கப்பட்டுள்ளது. 'படம் எடு / பதிவேற்று' பயன்படுத்தவும்.","लाइव कैमरा यहाँ बंद है। 'फोटो लें या अपलोड करें' का उपयोग करें।"],
+["That file is not a readable image.","அந்தக் கோப்பைப் படமாகப் படிக்க முடியவில்லை.","यह फ़ाइल पढ़ने योग्य तस्वीर नहीं है।"],
+["Choose the animal and at least one sign first.","முதலில் விலங்கையும் குறைந்தது ஒரு அறிகுறியையும் தேர்ந்தெடுக்கவும்.","पहले पशु और कम से कम एक लक्षण चुनें।"],
+["Choose the animal first.","முதலில் விலங்கைத் தேர்ந்தெடுக்கவும்.","पहले पशु चुनें।"],
+["From a farmer's report to a containment action","விவசாயியின் புகாரிலிருந்து தடுப்பு நடவடிக்கை வரை","किसान की रिपोर्ट से रोकथाम की कार्रवाई तक"],
+["Reporting, vaccination, lab and response sit in one workflow, so nothing gets lost between the village and the district office.","பதிவு, தடுப்பூசி, ஆய்வகம், நடவடிக்கை அனைத்தும் ஒரே செயல்முறையில் இருப்பதால் கிராமத்திற்கும் மாவட்ட அலுவலகத்திற்கும் இடையே எதுவும் தவறாது.","रिपोर्ट, टीकाकरण, लैब और कार्रवाई एक ही प्रक्रिया में हैं, इसलिए गाँव और जिला कार्यालय के बीच कुछ छूटता नहीं।"],
+["Report","புகார்","रिपोर्ट"],
+["A farmer or para-vet sends species, signs, count, deaths and location, with an optional photo.","விவசாயி அல்லது துணை கால்நடை பணியாளர் விலங்கு வகை, அறிகுறிகள், எண்ணிக்கை, இறப்பு, இடம் ஆகியவற்றை படத்துடன் (விருப்பம்) அனுப்புவார்.","किसान या पैरा-वेट पशु का प्रकार, लक्षण, संख्या, मौतें और स्थान भेजता है, चाहें तो फोटो के साथ।"],
+["Triage","முன்னுரிமை மதிப்பீடு","प्राथमिक जाँच"],
+["Vet-reviewed rules score the signs against a disease matrix. Notifiable and zoonotic diseases escalate automatically.","மருத்துவர் சரிபார்த்த விதிகள் அறிகுறிகளை நோய் அட்டவணையுடன் ஒப்பிடுகின்றன. அறிவிக்கத்தக்க, மனிதருக்குப் பரவும் நோய்கள் தானாக உயர் அதிகாரிக்குச் செல்லும்.","पशु चिकित्सक द्वारा जाँचे नियम लक्षणों को रोग तालिका से मिलाते हैं। अधिसूचित और जूनोटिक रोग अपने-आप आगे भेजे जाते हैं।"],
+["Verify and sample","உறுதிசெய்து மாதிரி எடு","पुष्टि और नमूना"],
+["The vet officer confirms, sends samples to the lab and starts containment.","கால்நடை அலுவலர் உறுதிசெய்து, மாதிரிகளை ஆய்வகத்திற்கு அனுப்பி, தடுப்பு நடவடிக்கையைத் தொடங்குவார்.","पशु अधिकारी पुष्टि करता है, नमूने लैब भेजता है और रोकथाम शुरू करता है।"],
+["Track","கண்காணி","निगरानी"],
+["A dashboard shows the outbreak map, vaccination coverage, reporting delay and open cases.","டாஷ்போர்டு நோய்ப் பரவல் வரைபடம், தடுப்பூசி அளவு, அறிக்கை தாமதம், நிலுவை வழக்குகளைக் காட்டுகிறது.","डैशबोर्ड प्रकोप का नक्शा, टीकाकरण कवरेज, रिपोर्टिंग में देरी और खुले मामले दिखाता है।"],
+["Right alert · Right time · Right place","சரியான எச்சரிக்கை · சரியான நேரம் · சரியான இடம்","सही अलर्ट · सही समय · सही जगह"],
+["Cattle","மாடு","गाय"],["Buffalo","எருமை","भैंस"],["Goat","வெள்ளாடு","बकरी"],["Sheep","செம்மறி ஆடு","भेड़"],["Pig","பன்றி","सूअर"],["Poultry","கோழி","मुर्गी"],
+["High fever, dull, not eating","அதிக காய்ச்சல், சோர்வு, தீவனம் உண்ணாதது","तेज़ बुखार, सुस्ती, चारा न खाना"],
+["Sudden death","திடீர் இறப்பு","अचानक मृत्यु"],
+["Dark blood from nose, mouth or rear","மூக்கு, வாய், பின்புறத்தில் கருமையான இரத்தம்","नाक, मुँह या पीछे से गहरा खून"],
+["Fast or hard breathing, coughing","வேகமான/சிரமமான சுவாசம், இருமல்","तेज़ या कठिन साँस, खाँसी"],
+["Watery or bloody diarrhoea","நீர்/இரத்தக் கழிச்சல்","पतले या खूनी दस्त"],
+["Nose or eye discharge","மூக்கு அல்லது கண்ணில் நீர் வடிதல்","नाक या आँख से स्राव"],
+["Too much drooling","அதிக உமிழ்நீர் வடிதல்","बहुत लार टपकना"],
+["Blisters or ulcers in mouth","வாயில் கொப்புளங்கள் அல்லது புண்கள்","मुँह में छाले या घाव"],
+["Limping, sores between hooves","நொண்டுதல், குளம்புகளுக்கிடையே புண்","लंगड़ाना, खुरों के बीच घाव"],
+["Firm lumps on skin","தோலில் கடினமான கட்டிகள்","त्वचा पर सख्त गाँठें"],
+["Swollen glands near shoulder","தோள்பட்டை அருகே சுரப்பி வீக்கம்","कंधे के पास गिल्टियों में सूजन"],
+["Sudden drop in milk","பால் திடீரெனக் குறைதல்","दूध अचानक कम होना"],
+["Hot, swollen, hard udder","சூடான, வீங்கிய, கடினமான மடி","गरम, सूजा, कड़ा थन"],
+["Clotted or bloody milk","திரிந்த அல்லது இரத்தம் கலந்த பால்","फटा या खूनी दूध"],
+["Swollen throat or neck","தொண்டை/கழுத்து வீக்கம்","गले या गर्दन में सूजन"],
+["Swollen left belly","இடது வயிறு உப்புதல்","बाईं ओर पेट फूलना"],
+["Scabby sores on lips and nose","உதடு, மூக்கில் சொறிப் புண்கள்","होंठ और नाक पर पपड़ीदार घाव"],
+["Abortion or stillbirth","கருச்சிதைவு அல்லது இறந்த குட்டி பிறப்பு","गर्भपात या मरा बच्चा पैदा होना"],
+["Aggressive, circling, cannot swallow","ஆக்ரோஷம், சுற்றி வருதல், விழுங்க முடியாமை","आक्रामक, गोल घूमना, निगल न पाना"],
+["Itching, hair loss, scabs","அரிப்பு, முடி உதிர்தல், சொறி","खुजली, बाल झड़ना, पपड़ी"],
+["Ticks on skin","தோலில் உண்ணிகள்","त्वचा पर किलनी"],
+["Red or purple skin patches","சிவப்பு/ஊதா தோல் திட்டுகள்","लाल या बैंगनी त्वचा के धब्बे"],
+["Twisted neck, tremors, paralysis","கழுத்து திரும்புதல், நடுக்கம், முடக்கம்","गर्दन मुड़ना, कंपकंपी, लकवा"],
+["Greenish droppings","பச்சை நிறக் கழிவு","हरे रंग की बीट"],
+["Swollen, dark comb or wattles","வீங்கிய, கருமையான கொண்டை","सूजी, काली कलगी या गलकंबल"],
+["Sharp drop in egg laying","முட்டையிடுவது திடீரெனக் குறைதல்","अंडे देना अचानक घटना"],
+["Foot-and-mouth disease","கால், வாய் நோய்","खुरपका-मुँहपका रोग"],
+["Lumpy skin disease","கட்டி தோல் நோய்","लम्पी स्किन रोग"],
+["Haemorrhagic septicaemia","தொண்டை அடைப்பான்","गलघोंटू"],
+["Anthrax","ஆந்த்ராக்ஸ் (நச்சுக் காய்ச்சல்)","एंथ्रेक्स (गिल्टी रोग)"],
+["Rabies","வெறிநாய்க்கடி நோய்","रेबीज़"],
+["Brucellosis","புருசெல்லோசிஸ்","ब्रुसेलोसिस"],
+["Mastitis","மடிவீக்க நோய்","थनैला रोग"],
+["PPR (goat plague)","ஆட்டுக் கொள்ளை நோய் (PPR)","पीपीआर (बकरी प्लेग)"],
+["Orf (scabby mouth)","வாய்ப்புண் சொறி (ஆர்ஃப்)","ऑर्फ (मुँह की पपड़ी)"],
+["Mange or tick infestation","சொறி அல்லது உண்ணித் தொல்லை","खाज या किलनी संक्रमण"],
+["Bloat","வயிறு உப்புசம்","अफारा"],
+["Swine fever (CSF or ASF)","பன்றிக் காய்ச்சல் (CSF/ASF)","स्वाइन फीवर (CSF/ASF)"],
+["Ranikhet disease","ராணிகெட் நோய்","रानीखेत रोग"],
+["Avian influenza","பறவைக் காய்ச்சல்","बर्ड फ्लू"],
+["Calf or young stock scour","கன்று/குட்டி கழிச்சல்","बछड़ों/बच्चों के दस्त"],
+["Keep the sick animal apart from the herd.","நோயுற்ற விலங்கை மந்தையிலிருந்து தனியாக வைக்கவும்.","बीमार पशु को झुंड से अलग रखें।"],
+["Stop animals moving in or out of the farm.","பண்ணைக்குள்/வெளியே விலங்குகள் செல்வதை நிறுத்தவும்.","फार्म में पशुओं का आना-जाना रोकें।"],
+["Wash hands and boots, and disinfect the shed.","கை, காலணிகளைக் கழுவி, கொட்டகையைக் கிருமிநாசினியால் சுத்தம் செய்யவும்.","हाथ और जूते धोएँ और शेड को कीटाणुमुक्त करें।"],
+["Report to the nearest vet dispensary.","அருகிலுள்ள கால்நடை மருந்தகத்தில் தெரிவிக்கவும்.","नज़दीकी पशु औषधालय को सूचना दें।"],
+["Control flies and mosquitoes around the shed.","கொட்டகையைச் சுற்றி ஈ, கொசுக்களைக் கட்டுப்படுத்தவும்.","शेड के आसपास मक्खी-मच्छर नियंत्रित करें।"],
+["Report to the vet. Ask about vaccinating healthy animals.","மருத்துவரிடம் தெரிவித்து, ஆரோக்கியமான விலங்குகளுக்குத் தடுப்பூசி பற்றிக் கேளுங்கள்.","डॉक्टर को बताएँ और स्वस्थ पशुओं के टीके के बारे में पूछें।"],
+["Call a vet today. This disease can kill within a day.","இன்றே மருத்துவரை அழைக்கவும். இந்நோய் ஒரு நாளுக்குள் உயிரைப் பறிக்கும்.","आज ही डॉक्टर बुलाएँ। यह रोग एक दिन में जान ले सकता है।"],
+["Ask the vet about vaccination before the monsoon.","பருவமழைக்கு முன் தடுப்பூசி பற்றி மருத்துவரிடம் கேளுங்கள்.","मानसून से पहले टीके के बारे में डॉक्टर से पूछें।"],
+["Do not open or skin the dead animal.","இறந்த விலங்கைத் திறக்கவோ தோலுரிக்கவோ வேண்டாம்.","मरे पशु को न चीरें, न उसकी खाल उतारें।"],
+["Keep people, dogs and birds away from the carcass.","உடலிலிருந்து மக்கள், நாய்கள், பறவைகளை விலக்கி வைக்கவும்.","शव से लोगों, कुत्तों और पक्षियों को दूर रखें।"],
+["Call the vet officer immediately.","உடனே கால்நடை அலுவலரை அழைக்கவும்.","तुरंत पशु अधिकारी को बुलाएँ।"],
+["Do not touch saliva or handle the animal bare-handed.","உமிழ்நீரைத் தொடாதீர்கள்; வெறும் கையால் விலங்கைக் கையாளாதீர்கள்.","लार न छुएँ और पशु को नंगे हाथ न पकड़ें।"],
+["Keep people away and call the vet officer.","மக்களை விலக்கி வைத்து கால்நடை அலுவலரை அழைக்கவும்.","लोगों को दूर रखें और पशु अधिकारी को बुलाएँ।"],
+["Anyone bitten or scratched should go to a hospital at once.","கடிபட்டவர் அல்லது கீறப்பட்டவர் உடனே மருத்துவமனைக்குச் செல்ல வேண்டும்.","जिसे काटा या खरोंचा गया हो वह तुरंत अस्पताल जाए।"],
+["Wear gloves and bury aborted material and bedding.","கையுறை அணிந்து, கருச்சிதைவுப் பொருட்களையும் படுக்கையையும் புதைக்கவும்.","दस्ताने पहनें और गर्भपात का मलबा व बिछावन दफ़ना दें।"],
+["Do not drink raw milk. Ask the vet for a blood test.","காய்ச்சாத பால் குடிக்க வேண்டாம். இரத்தப் பரிசோதனை பற்றி மருத்துவரிடம் கேளுங்கள்.","कच्चा दूध न पिएँ। ख़ून की जाँच के लिए डॉक्टर से पूछें।"],
+["Milk out the affected quarter and discard that milk.","பாதித்த மடிப்பகுதியின் பாலைக் கறந்து கொட்டிவிடவும்.","प्रभावित थन का दूध निकालकर फेंक दें।"],
+["Keep the udder and milking area clean.","மடியையும் பால் கறக்கும் இடத்தையும் சுத்தமாக வைக்கவும்.","थन और दूध निकालने की जगह साफ़ रखें।"],
+["See a vet for treatment.","சிகிச்சைக்கு மருத்துவரைப் பாருங்கள்.","इलाज के लिए डॉक्टर को दिखाएँ।"],
+["Give clean water and shade.","சுத்தமான நீரும் நிழலும் கொடுக்கவும்.","साफ़ पानी और छाया दें।"],
+["Report to the vet. PPR spreads fast and vaccine is available.","மருத்துவரிடம் தெரிவிக்கவும். PPR வேகமாகப் பரவும்; தடுப்பூசி உள்ளது.","डॉक्टर को बताएँ। पीपीआर तेज़ी से फैलता है और टीका उपलब्ध है।"],
+["Wear gloves when handling sick animals. People can catch orf.","நோயுற்ற விலங்குகளைக் கையாளும்போது கையுறை அணியுங்கள். ஆர்ஃப் மனிதருக்கும் பரவும்.","बीमार पशु को छूते समय दस्ताने पहनें। ऑर्फ इंसानों को भी हो सकता है।"],
+["Soft feed helps lambs and kids eat.","மென்மையான தீவனம் குட்டிகள் உண்ண உதவும்.","नरम चारा बच्चों को खाने में मदद करता है।"],
+["Ask the vet about care.","பராமரிப்பு பற்றி மருத்துவரிடம் கேளுங்கள்.","देखभाल के बारे में डॉक्टर से पूछें।"],
+["Treat all animals in the group, not only the sick one.","நோயுற்றதை மட்டுமல்ல, குழுவிலுள்ள அனைத்தையும் சிகிச்சை செய்யவும்.","सिर्फ़ बीमार नहीं, समूह के सभी पशुओं का इलाज करें।"],
+["Clean and treat the shed.","கொட்டகையைச் சுத்தம் செய்து மருந்து தெளிக்கவும்.","शेड को साफ़ करें और दवा का छिड़काव करें।"],
+["Ask the vet for a safe dip or spray.","பாதுகாப்பான மருந்துக் குளியல் அல்லது தெளிப்பு பற்றி மருத்துவரிடம் கேளுங்கள்.","सुरक्षित डिप या स्प्रे के बारे में डॉक्टर से पूछें।"],
+["Call a vet now. Bloat can kill within hours.","இப்போதே மருத்துவரை அழைக்கவும். உப்புசம் சில மணி நேரத்தில் உயிரைப் பறிக்கும்.","अभी डॉक्टर बुलाएँ। अफारा कुछ घंटों में जान ले सकता है।"],
+["Walk the animal gently. Do not let it lie down.","விலங்கை மெதுவாக நடக்க வைக்கவும். படுக்க விடாதீர்கள்.","पशु को धीरे-धीरे चलाएँ। बैठने या लेटने न दें।"],
+["Stop green fodder and legumes until the vet advises.","மருத்துவர் சொல்லும் வரை பசுந்தீவனம், பயறு வகைகளை நிறுத்தவும்.","डॉक्टर के कहने तक हरा चारा और दलहन बंद रखें।"],
+["Stop visitors and do not move pigs.","பார்வையாளர்களை நிறுத்தி, பன்றிகளை இடம் மாற்றாதீர்கள்.","बाहरी लोगों को रोकें और सूअरों को कहीं न ले जाएँ।"],
+["Report to the vet officer today.","இன்றே கால்நடை அலுவலருக்குத் தெரிவிக்கவும்.","आज ही पशु अधिकारी को सूचना दें।"],
+["Report if many birds are sick.","பல கோழிகள் நோயுற்றால் தெரிவிக்கவும்.","कई मुर्गियाँ बीमार हों तो सूचना दें।"],
+["Vaccinate healthy birds. Ask the vet.","ஆரோக்கியமான கோழிகளுக்குத் தடுப்பூசி போடவும். மருத்துவரிடம் கேளுங்கள்.","स्वस्थ मुर्गियों का टीकाकरण करें। डॉक्टर से पूछें।"],
+["Do not sell or eat sick or dead birds.","நோயுற்ற அல்லது இறந்த கோழிகளை விற்கவோ உண்ணவோ வேண்டாம்.","बीमार या मरी मुर्गियाँ न बेचें, न खाएँ।"],
+["Wear a mask and gloves and wash well afterwards.","முகக்கவசம், கையுறை அணிந்து, பின்னர் நன்கு கழுவவும்.","मास्क और दस्ताने पहनें और बाद में अच्छी तरह धोएँ।"],
+["Report to the vet officer immediately.","உடனே கால்நடை அலுவலருக்குத் தெரிவிக்கவும்.","तुरंत पशु अधिकारी को सूचना दें।"],
+["Give clean water with oral rehydration salts.","ORS உப்புடன் சுத்தமான நீர் கொடுக்கவும்.","ओआरएस के साथ साफ़ पानी दें।"],
+["Keep the animal warm and the bedding dry.","விலங்கைச் சூடாகவும் படுக்கையை உலர்ந்ததாகவும் வைக்கவும்.","पशु को गर्म और बिछावन को सूखा रखें।"],
+["See a vet if it will not drink or is weak.","நீர் குடிக்காவிட்டால் அல்லது சோர்வாக இருந்தால் மருத்துவரைப் பாருங்கள்.","पानी न पिए या कमज़ोर हो तो डॉक्टर को दिखाएँ।"],
+["Urgency","அவசரநிலை","गंभीरता"],["High","அதிகம்","ज़्यादा"],["Medium","நடுத்தரம்","मध्यम"],["Low","குறைவு","कम"],
+["Possible zoonotic disease: it can spread to people. Avoid direct contact and report today.","மனிதருக்குப் பரவக்கூடிய நோயாக இருக்கலாம். நேரடித் தொடர்பைத் தவிர்த்து இன்றே தெரிவிக்கவும்.","जूनोटिक रोग हो सकता है, जो इंसानों में फैल सकता है। सीधे संपर्क से बचें और आज ही सूचना दें।"],
+["Possible notifiable disease. Report to the vet officer today.","அறிவிக்க வேண்டிய நோயாக இருக்கலாம். இன்றே கால்நடை அலுவலருக்குத் தெரிவிக்கவும்.","अधिसूचित रोग हो सकता है। आज ही पशु अधिकारी को सूचना दें।"],
+["Possible outbreak: 3 or more sick, or any death. Report to the vet officer today, even if the cause is unclear.","நோய்ப் பரவல் இருக்கலாம்: 3 அல்லது அதற்கு மேல் நோய் அல்லது ஏதேனும் இறப்பு. காரணம் தெரியாவிட்டாலும் இன்றே கால்நடை அலுவலருக்குத் தெரிவிக்கவும்.","प्रकोप हो सकता है: 3 या अधिक बीमार, या कोई मौत। कारण साफ़ न हो तब भी आज ही पशु अधिकारी को सूचना दें।"],
+["Possible conditions","சாத்தியமான நோய்கள்","संभावित बीमारियाँ"],
+["No clear match. Keep the animal apart, give clean water and shade, and call a vet if it worsens or stops eating.","தெளிவான பொருத்தம் இல்லை. விலங்கைத் தனியாக வைத்து, சுத்தமான நீரும் நிழலும் கொடுத்து, நிலை மோசமானால் அல்லது உண்ணாவிட்டால் மருத்துவரை அழைக்கவும்.","कोई साफ़ मेल नहीं। पशु को अलग रखें, साफ़ पानी और छाया दें, हालत बिगड़े या खाना छोड़े तो डॉक्टर बुलाएँ।"],
+["Matches","பொருந்தும் அறிகுறிகள்","मेल खाते लक्षण"],
+["What to do now","இப்போது செய்ய வேண்டியவை","अभी क्या करें"],
+["Send report to vet officer","கால்நடை அலுவலருக்கு அறிக்கை அனுப்பு","पशु अधिकारी को रिपोर्ट भेजें"],
+["Copy","நகலெடு","कॉपी करें"],["Copied","நகலெடுக்கப்பட்டது","कॉपी हो गया"],["Select the text above","மேலுள்ள உரையைத் தேர்ந்தெடுக்கவும்","ऊपर का टेक्स्ट चुनें"],
+["This is a screening aid based on visible signs, not a diagnosis. A photo cannot confirm a disease. Have a veterinarian examine the animal and confirm with a lab test.","இது தெரியும் அறிகுறிகளை வைத்து உதவும் ஆரம்பப் பரிசோதனை மட்டுமே, நோய் உறுதிப்படுத்தல் அல்ல. படத்தால் நோயை உறுதிசெய்ய முடியாது. கால்நடை மருத்துவர் பரிசோதித்து ஆய்வகச் சோதனையால் உறுதிசெய்ய வேண்டும்.","यह दिखने वाले लक्षणों पर आधारित शुरुआती जाँच है, निदान नहीं। फोटो से बीमारी की पुष्टि नहीं हो सकती। पशु चिकित्सक से जाँच कराएँ और लैब टेस्ट से पुष्टि करें।"],
+["PashuRaksha report","பசுரக்ஷா அறிக்கை","पशुरक्षा रिपोर्ट"],["Location","இடம்","स्थान"],["Animal","விலங்கு","पशु"],["Sick","நோய்","बीमार"],["Dead","இறப்பு","मृत"],["Signs","அறிகுறிகள்","लक्षण"],["Suspected","சந்தேகிக்கப்படுவது","संभावित रोग"],["unclear","தெளிவில்லை","अस्पष्ट"],["Photo available","படம் உள்ளது","फोटो उपलब्ध है"]];
+let LANG='en';const TR={ta:{},hi:{}};
+ROWS.forEach(r=>{TR.ta[r[0]]=r[1];TR.hi[r[0]]=r[2]});
+const tr=s=>(TR[LANG]&&TR[LANG][s])||s;
+</script>
+<script>
+const $=id=>document.getElementById(id);
+const SP=[['Cattle','R'],['Buffalo','R'],['Goat','R'],['Sheep','R'],['Pig','P'],['Poultry','Y']];
+// id, label, groups it applies to (R ruminant, P pig, Y poultry)
+const SG=[
+['fever','High fever, dull, not eating','RPY'],['sudden','Sudden death','RPY'],['bloodout','Dark blood from nose, mouth or rear','RP'],
+['breathing','Fast or hard breathing, coughing','RPY'],['diarrhoea','Watery or bloody diarrhoea','RPY'],['nasal','Nose or eye discharge','RPY'],
+['drool','Too much drooling','RP'],['blisters','Blisters or ulcers in mouth','RP'],['hoof','Limping, sores between hooves','RP'],
+['nodules','Firm lumps on skin','R'],['nodes','Swollen glands near shoulder','R'],['milk','Sudden drop in milk','R'],
+['udder','Hot, swollen, hard udder','R'],['clot','Clotted or bloody milk','R'],['throat','Swollen throat or neck','R'],
+['bloat','Swollen left belly','R'],['lips','Scabby sores on lips and nose','R'],['abortion','Abortion or stillbirth','RP'],
+['nervous','Aggressive, circling, cannot swallow','RP'],['itch','Itching, hair loss, scabs','RP'],['ticks','Ticks on skin','RP'],
+['redskin','Red or purple skin patches','P'],['twist','Twisted neck, tremors, paralysis','Y'],['green','Greenish droppings','Y'],
+['comb','Swollen, dark comb or wattles','Y'],['eggs','Sharp drop in egg laying','Y']];
+const ALL=['Cattle','Buffalo','Goat','Sheep','Pig'],RU=['Cattle','Buffalo','Goat','Sheep'];
+const iso='Keep the sick animal apart from the herd.';
+// name, species, notifiable, zoonotic, high-risk, weights, advice
+const DZ=[
+['Foot-and-mouth disease',ALL,1,0,0,{fever:2,drool:3,blisters:3,hoof:3,milk:2},[iso,'Stop animals moving in or out of the farm.','Wash hands and boots, and disinfect the shed.','Report to the nearest vet dispensary.']],
+['Lumpy skin disease',['Cattle','Buffalo'],1,0,0,{nodules:4,fever:2,nodes:2,milk:1,nasal:1},[iso,'Control flies and mosquitoes around the shed.','Report to the vet. Ask about vaccinating healthy animals.']],
+['Haemorrhagic septicaemia',['Cattle','Buffalo'],1,0,1,{fever:2,throat:3,breathing:3,drool:1,sudden:2},['Call a vet today. This disease can kill within a day.',iso,'Ask the vet about vaccination before the monsoon.']],
+['Anthrax',ALL,1,1,1,{sudden:4,bloodout:4,fever:1,bloat:1},['Do not open or skin the dead animal.','Keep people, dogs and birds away from the carcass.','Call the vet officer immediately.']],
+['Rabies',ALL,1,1,1,{nervous:4,drool:2},['Do not touch saliva or handle the animal bare-handed.','Keep people away and call the vet officer.','Anyone bitten or scratched should go to a hospital at once.']],
+['Brucellosis',ALL,0,1,0,{abortion:5,fever:1},[iso,'Wear gloves and bury aborted material and bedding.','Do not drink raw milk. Ask the vet for a blood test.']],
+['Mastitis',['Cattle','Buffalo','Goat','Sheep'],0,0,0,{udder:4,clot:4,milk:2,fever:1},['Milk out the affected quarter and discard that milk.','Keep the udder and milking area clean.','See a vet for treatment.']],
+['PPR (goat plague)',['Goat','Sheep'],1,0,0,{fever:2,nasal:3,blisters:2,diarrhoea:3,breathing:2},[iso,'Give clean water and shade.','Report to the vet. PPR spreads fast and vaccine is available.']],
+['Orf (scabby mouth)',['Goat','Sheep'],0,1,0,{lips:4,blisters:1},['Wear gloves when handling sick animals. People can catch orf.','Soft feed helps lambs and kids eat.','Ask the vet about care.']],
+['Mange or tick infestation',ALL,0,0,0,{itch:4,ticks:3},['Treat all animals in the group, not only the sick one.','Clean and treat the shed.','Ask the vet for a safe dip or spray.']],
+['Bloat',RU,0,0,1,{bloat:5,breathing:1},['Call a vet now. Bloat can kill within hours.','Walk the animal gently. Do not let it lie down.','Stop green fodder and legumes until the vet advises.']],
+['Swine fever (CSF or ASF)',['Pig'],1,0,1,{fever:2,redskin:3,diarrhoea:2,sudden:3,breathing:1},[iso,'Stop visitors and do not move pigs.','Report to the vet officer today.']],
+['Ranikhet disease',['Poultry'],1,0,0,{twist:4,green:3,breathing:2,sudden:2,eggs:2},[iso,'Report if many birds are sick.','Vaccinate healthy birds. Ask the vet.']],
+['Avian influenza',['Poultry'],1,1,1,{sudden:4,comb:3,eggs:2,breathing:1},['Do not sell or eat sick or dead birds.','Wear a mask and gloves and wash well afterwards.','Report to the vet officer immediately.']],
+['Calf or young stock scour',['Cattle','Buffalo','Goat','Sheep','Pig'],0,0,0,{diarrhoea:4,fever:1},['Give clean water with oral rehydration salts.','Keep the animal warm and the bedding dry.','See a vet if it will not drink or is weak.']]];
 
-          <div class="p-3 border rounded mb-2 flex-between cursor-pointer" onclick="quickSwitchRole('asha')">
-            <div>
-              <strong>Sunita Devi (ASHA / ANM Worker)</strong>
-              <div class="text-xs text-muted">Sub-Center Rampur • Tracked Population: 1,420</div>
-            </div>
-            <span class="badge badge-emerald">Switch &rarr;</span>
-          </div>
+let species='',blob=null,stream=null,lastReport='';
+const picked=()=>[...document.querySelectorAll('#signs input:checked')].map(i=>i.value);
+const grp=()=>(SP.find(s=>s[0]===species)||[])[1]||'';
 
-          <div class="p-3 border rounded mb-2 flex-between cursor-pointer" onclick="quickSwitchRole('doctor')">
-            <div>
-              <strong>Dr. Arvind Sharma (Medical Officer)</strong>
-              <div class="text-xs text-muted">MBBS, MD • PHC Rampur OPD & Telemedicine</div>
-            </div>
-            <span class="badge badge-blue">Switch &rarr;</span>
-          </div>
+function drawSpecies(){
+  $('species').replaceChildren();
+  SP.forEach(([n])=>{
+    const l=document.createElement('label');
+    l.innerHTML='<input type="radio" name="sp"><span></span>';
+    l.querySelector('span').textContent=tr(n);
+    const i=l.querySelector('input');i.checked=species===n;
+    i.onchange=()=>{species=n;drawSigns()};
+    $('species').append(l);
+  });
+}
+drawSpecies();
+function drawSigns(){
+  const keep=new Set(picked()),g=grp(),box=$('signs');box.replaceChildren();
+  if(!g){box.textContent=tr('Choose the animal first.');return}
+  SG.filter(s=>s[2].includes(g)).forEach(([id,t])=>{
+    const l=document.createElement('label'),i=document.createElement('input'),s=document.createElement('span');
+    i.type='checkbox';i.value=id;i.checked=keep.has(id);s.textContent=tr(t);l.append(i,s);box.append(l);
+  });
+}
+drawSigns();
 
-          <div class="p-3 border rounded flex-between cursor-pointer" onclick="quickSwitchRole('admin')">
-            <div>
-              <strong>Rajesh Verma (Health Administrator)</strong>
-              <div class="text-xs text-muted">District Health Officer (DHO) • Raigarh Command Center</div>
-            </div>
-            <span class="badge badge-purple">Switch &rarr;</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+// ---- camera ----
+const say=(t,bad)=>{$('msg').textContent=tr(t||'');$('msg').className='note'+(bad?' err':'')};
+const mode=m=>{$('r-idle').hidden=m!=='idle';$('r-live').hidden=m!=='live';$('r-shot').hidden=m!=='shot';$('vid').hidden=m!=='live';$('shot').hidden=m!=='shot';$('hint').hidden=m!=='idle'};
+function stopCam(){if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}}
+$('b-cam').onclick=async()=>{
+  say('');
+  try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false});$('vid').srcObject=stream;await $('vid').play();mode('live')}
+  catch(e){stopCam();say('Live camera is blocked here. Use "Take or upload photo" instead.',true)}
+};
+$('b-stop').onclick=()=>{stopCam();mode('idle')};
+function toBlob(src,w,h){const k=Math.min(1,1024/Math.max(w,h)),c=$('cv');c.width=Math.round(w*k);c.height=Math.round(h*k);c.getContext('2d').drawImage(src,0,0,c.width,c.height);return new Promise(r=>c.toBlob(r,'image/jpeg',.85))}
+function setShot(b){blob=b;$('shot').src=URL.createObjectURL(b);mode('shot')}
+$('b-snap').onclick=async()=>{const v=$('vid');const b=await toBlob(v,v.videoWidth,v.videoHeight);stopCam();setShot(b)};
+$('b-up').onclick=()=>$('file').click();
+$('file').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const m=await createImageBitmap(f);setShot(await toBlob(m,m.width,m.height))}catch(_){say('That file is not a readable image.',true)}e.target.value=''};
+$('b-redo').onclick=()=>{blob=null;mode('idle')};
+window.addEventListener('pagehide',stopCam);
 
-  <!-- Voice Assistant Feedback Modal -->
-  <div id="voice-modal" class="modal-overlay hidden" role="dialog">
-    <div class="modal-card text-center p-4">
-      <div class="mb-3">
-        <div class="pulsing-mic-circle" style="width:70px; height:70px; border-radius:50%; background:var(--primary-teal-light); display:flex; align-items:center; justify-content:center; margin:0 auto;">
-          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
-        </div>
-      </div>
-      <h3>RuralCare Voice Assistant</h3>
-      <p id="voice-status-text" class="text-sm text-teal font-bold mb-2">Listening... Please speak your command or form entry.</p>
-      <div id="voice-transcript" class="font-mono text-sm p-3 bg-surface rounded mb-3">"..."</div>
-      <p class="text-xs text-muted">Try saying: <em>"Emergency"</em>, <em>"Ambulance"</em>, <em>"Doctor appointment"</em>, <em>"Medicines"</em>, or <em>"Read screen"</em>.</p>
-    </div>
-  </div>
+// ---- rule engine ----
+function el(t,txt,c){const e=document.createElement(t);if(txt!=null)e.textContent=txt;if(c)e.className=c;return e}
+function analyse(){
+  const sel=picked(),sick=+$('n-sick').value||1,dead=+$('n-dead').value||0,out=[];
+  DZ.forEach(([name,sp,n,z,hi,w,adv])=>{
+    if(!sp.includes(species))return;
+    const tot=Object.values(w).reduce((a,b)=>a+b,0);
+    const m=sel.reduce((a,s)=>a+(w[s]||0),0),r=m/tot;
+    if(m>=3||(m>=2&&r>=.35))out.push({name,n,z,hi,adv,r,why:sel.filter(s=>w[s]).map(s=>SG.find(x=>x[0]===s)[1])});
+  });
+  out.sort((a,b)=>b.r-a.r);
+  const top=out.slice(0,3);
+  const risky=top.some(d=>(d.n||d.z||d.hi)&&d.r>=.4);
+  const urgency=risky||dead>0||sel.includes('sudden')?'high':top.length||sel.length>=3?'medium':'low';
+  return{top,urgency,sick,dead,sel,cluster:sick>=3||dead>=1,zoo:top.some(d=>d.z&&d.r>=.4),notif:top.some(d=>d.n&&d.r>=.4)};
+}
+const lk=r=>r>=.6?'High':r>=.35?'Medium':'Low';
+let shown=false;
+function show(q){
+  if(!species||!picked().length){say('Choose the animal and at least one sign first.',true);return}
+  say('');shown=true;
+  const a=analyse(),box=$('res');box.replaceChildren();box.hidden=false;$('empty').hidden=true;
+  const cap=a.urgency[0].toUpperCase()+a.urgency.slice(1);
+  const h=el('div');h.append(el('span',tr('Urgency')+': '+tr(cap),'badge u-'+a.urgency),el('span','  '+tr(species)));box.append(h);
+  if(a.zoo)box.append(el('div',tr('Possible zoonotic disease: it can spread to people. Avoid direct contact and report today.'),'alert'));
+  else if(a.notif)box.append(el('div',tr('Possible notifiable disease. Report to the vet officer today.'),'alert'));
+  if(a.cluster)box.append(el('div',tr('Possible outbreak: 3 or more sick, or any death. Report to the vet officer today, even if the cause is unclear.'),'alert'));
+  box.append(el('h3',tr('Possible conditions')));
+  if(!a.top.length)box.append(el('p',tr('No clear match. Keep the animal apart, give clean water and shade, and call a vet if it worsens or stops eating.')));
+  a.top.forEach(d=>{const c=el('div',null,'cond'),r=el('div');r.append(el('span',tr(d.name)),el('span',tr(lk(d.r))));c.append(r,el('small',tr('Matches')+': '+d.why.map(x=>tr(x)).join(', ')));box.append(c)});
+  if(a.top.length){box.append(el('h3',tr('What to do now')));const u=el('ul');[...new Set(a.top.slice(0,2).flatMap(d=>d.adv))].forEach(x=>u.append(el('li',tr(x))));box.append(u)}
+  const loc=$('loc').value.trim(),dt=new Date().toLocaleDateString('en-IN');
+  const sg=a.sel.map(s=>tr(SG.find(x=>x[0]===s)[1])).join('; ');
+  lastReport=[tr('PashuRaksha report'),dt,loc&&tr('Location')+': '+loc,tr('Animal')+': '+tr(species),tr('Sick')+': '+a.sick+', '+tr('Dead')+': '+a.dead,tr('Sick for')+': '+$('dur').value,tr('Signs')+': '+sg,tr('Suspected')+': '+(a.top.map(d=>tr(d.name)).join(', ')||tr('unclear')),tr('Urgency')+': '+tr(cap),blob?tr('Photo available'):''].filter(Boolean).join('\n');
+  box.append(el('h3',tr('Send report to vet officer')),el('pre',lastReport,'rep'));
+  const row=el('div',null,'row'),cp=el('button',tr('Copy'),'primary'),sms=el('button','SMS'),wa=el('button','WhatsApp');
+  cp.onclick=async()=>{try{await navigator.clipboard.writeText(lastReport);cp.textContent=tr('Copied')}catch(_){cp.textContent=tr('Select the text above')}};
+  sms.onclick=()=>{location.href='sms:?body='+encodeURIComponent(lastReport)};
+  wa.onclick=()=>window.open('https://wa.me/?text='+encodeURIComponent(lastReport),'_blank','noopener');
+  row.append(cp,sms,wa);box.append(row);
+  box.append(el('p',tr('This is a screening aid based on visible signs, not a diagnosis. A photo cannot confirm a disease. Have a veterinarian examine the animal and confirm with a lab test.'),'disc'));
+  if(!q&&matchMedia('(max-width:860px)').matches)$('out').scrollIntoView({behavior:'smooth'});
+}
+$('b-go').onclick=()=>show();
+$('b-clear').onclick=()=>{shown=false;species='';document.querySelectorAll('#species input').forEach(i=>i.checked=false);drawSigns();$('n-sick').value=1;$('n-dead').value=0;$('loc').value='';$('dur').selectedIndex=0;blob=null;stopCam();mode('idle');say('');$('res').hidden=true;$('empty').hidden=false};
 
-  <!-- Floating Persistent Red SOS Trigger Button -->
-  <button id="global-sos-btn" class="floating-sos-btn btn-pulse" aria-label="Trigger Emergency SOS">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-    <span data-i18n="sos_button">EMERGENCY SOS</span>
-  </button>
-
-  <!-- SPA Router Mount Point -->
-  <main id="app" role="main">
-    <!-- Active view will be dynamically injected here -->
-  </main>
-
-  <!-- Mobile Bottom Quick Navigation Dock -->
-  <nav class="mobile-bottom-dock" aria-label="Mobile Navigation">
-    <div class="dock-items-row">
-      <a href="#/" class="dock-item active">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        <span>Home</span>
-      </a>
-      <a href="#/appointments" class="dock-item">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        <span>Book</span>
-      </a>
-      <a href="#/emergency" class="dock-item dock-sos">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        <span>SOS</span>
-      </a>
-      <a href="#/records" class="dock-item">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-        <span>Records</span>
-      </a>
-      <a href="#/ussd-sms" class="dock-item">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-        <span>*123#</span>
-      </a>
-    </div>
-  </nav>
-
-  <!-- App Footer -->
-  <footer class="app-footer">
-    <div class="footer-inner">
-      <div>
-        <strong>RuralCare | VisionX | SIH 2026</strong> — Problem Statement ID: SIH26133
-      </div>
-      <div>
-        <span>"Right Care • Right Time • Right Place"</span> •
-        <a href="#/about" class="text-teal font-bold ml-2">About & Research Citations &rarr;</a>
-      </div>
-    </div>
-  </footer>
-
-  <!-- Core JavaScript Modules (Ordered Dependency Tree) -->
-  <script src="./icons.js"></script>
-  <script src="./i18n.js"></script>
-  <script src="./firebase-config.js"></script>
-  <script src="./store.js"></script>
-  <script src="./idb-queue.js"></script>
-  <script src="./voice-assistant.js"></script>
-
-  <!-- View Screens -->
-  <script src="./landing.js"></script>
-  <script src="./login.js"></script>
-  <script src="./dashboards.js"></script>
-  <script src="./appointments.js"></script>
-  <script src="./emergency.js"></script>
-  <script src="./ambulance.js"></script>
-  <script src="./teleconsult.js"></script>
-  <script src="./records.js"></script>
-  <script src="./referrals.js"></script>
-  <script src="./medicines.js"></script>
-  <script src="./followups.js"></script>
-  <script src="./offline.js"></script>
-  <script src="./blood.js"></script>
-  <script src="./organ.js"></script>
-  <script src="./fund.js"></script>
-  <script src="./camps.js"></script>
-  <script src="./analytics.js"></script>
-  <script src="./ussd-sms.js"></script>
-  <script src="./about.js"></script>
-
-  <!-- SPA Router & Global Controller -->
-  <script src="./router.js"></script>
-  <script src="./app.js"></script>
-
+const orig=new WeakMap();
+function applyLang(){
+  document.documentElement.lang=LANG;
+  const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,{acceptNode:n=>n.parentNode.closest('script,#lang,#species,#signs,#res,#msg')?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT});
+  const ns=[];while(w.nextNode())ns.push(w.currentNode);
+  ns.forEach(n=>{if(!orig.has(n))orig.set(n,n.data);const o=orig.get(n),k=o.trim();if(k)n.data=o.replace(k,tr(k))});
+  $('loc').placeholder=tr('Village, block');
+  drawSpecies();drawSigns();if(shown)show(true);
+}
+$('lang').onchange=e=>{LANG=e.target.value;try{localStorage.setItem('pr-lang',LANG)}catch(_){}applyLang()};
+(()=>{let s=null;try{s=localStorage.getItem('pr-lang')}catch(_){}s=s||(navigator.language||'en').slice(0,2);if(TR[s]){LANG=s;$('lang').value=s}applyLang()})();
+</script>
 </body>
 </html>
